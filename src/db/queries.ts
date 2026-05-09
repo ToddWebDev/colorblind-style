@@ -53,6 +53,7 @@ export function fetchMatches(): MatchResult[] {
       hsl: { h: row.color2_h, s: row.color2_s, l: row.color2_l },
       name: row.color2_name,
     },
+    createdAt: row.created_at,
   }))
 }
 

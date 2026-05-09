@@ -66,7 +66,7 @@ function MatchRow({
   const [showDelete, setShowDelete] = useState(false)
 
   const handleDelete = () => {
-    deleteMatch(match.score, Date.now())
+    deleteMatch(match.score, match.createdAt ?? 0)
     onDelete()
   }
 

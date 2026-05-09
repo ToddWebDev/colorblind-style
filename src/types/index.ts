@@ -29,3 +29,11 @@ export type MatchResult = {
   color1: ColorSample
   color2: ColorSample
 }
+
+export type MatchResult = {
+  score: number
+  relationship: ColorRelationship
+  color1: ColorSample
+  color2: ColorSample
+  createdAt?: number
+}
