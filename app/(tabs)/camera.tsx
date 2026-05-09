@@ -6,10 +6,21 @@ import { analyzeMatch } from '@/src/color/engine'
 export default function CameraScreen() {
   const { setCurrentMatch } = useMatchStore()
 
+  // Good Match Simulation
+  // const simulateMatch = () => {
+  //   const result = analyzeMatch(
+  //     { r: 204, g: 173, b: 82 },
+  //     { r: 210, g: 105, b: 80 },
+  //   )
+  //   setCurrentMatch(result)
+  //   router.push('/results')
+  // }
+
+  // Poor Match Simulation
   const simulateMatch = () => {
     const result = analyzeMatch(
-      { r: 204, g: 173, b: 82 },
-      { r: 210, g: 105, b: 80 },
+      { r: 128, g: 128, b: 128 },
+      { r: 140, g: 130, b: 125 },
     )
     setCurrentMatch(result)
     router.push('/results')

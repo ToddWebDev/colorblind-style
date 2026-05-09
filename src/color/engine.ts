@@ -51,7 +51,7 @@ export function getColorName(hsl: HSL): string {
     lMax: number
   }>
 
-  const match = entries.find(
+  const exactMatch = entries.find(
     ({ hMin, hMax, sMin, sMax, lMin, lMax }) =>
       hsl.h >= hMin &&
       hsl.h <= hMax &&
@@ -61,7 +61,24 @@ export function getColorName(hsl: HSL): string {
       hsl.l <= lMax,
   )
 
-  return match?.name ?? 'Unknown'
+  if (exactMatch) return exactMatch.name
+
+  // fallback: find closest match by hue alone
+  const closest = entries.reduce((prev, curr) => {
+    const prevMidHue = (prev.hMin + prev.hMax) / 2
+    const currMidHue = (curr.hMin + curr.hMax) / 2
+    const prevDist = Math.min(
+      Math.abs(hsl.h - prevMidHue),
+      360 - Math.abs(hsl.h - prevMidHue),
+    )
+    const currDist = Math.min(
+      Math.abs(hsl.h - currMidHue),
+      360 - Math.abs(hsl.h - currMidHue),
+    )
+    return currDist < prevDist ? curr : prev
+  })
+
+  return closest.name
 }
 
 export function hueDistance(h1: number, h2: number): number {
@@ -69,7 +86,13 @@ export function hueDistance(h1: number, h2: number): number {
   return Math.min(diff, 360 - diff)
 }
 
-export function classifyRelationship(distance: number): ColorRelationship {
+export function classifyRelationship(
+  distance: number,
+  s1: number,
+  s2: number,
+): ColorRelationship {
+  const avgSaturation = (s1 + s2) / 2
+  if (avgSaturation < 15) return 'neutral'
   if (distance <= 30) return 'analogous'
   if (distance >= 150 && distance <= 210) return 'complementary'
   if (distance >= 110 && distance <= 130) return 'triadic'
@@ -80,7 +103,12 @@ export function classifyRelationship(distance: number): ColorRelationship {
 export function scoreMatch(
   distance: number,
   relationship: ColorRelationship,
+  s1: number,
+  s2: number,
 ): number {
+  const avgSaturation = (s1 + s2) / 2
+  if (avgSaturation < 15) return Math.round(avgSaturation * 2)
+
   switch (relationship) {
     case 'complementary':
       return 95
@@ -103,8 +131,8 @@ export function analyzeMatch(rgb1: RGB, rgb2: RGB): MatchResult {
   const name2 = getColorName(hsl2)
 
   const distance = hueDistance(hsl1.h, hsl2.h)
-  const relationship = classifyRelationship(distance)
-  const score = scoreMatch(distance, relationship)
+  const relationship = classifyRelationship(distance, hsl1.s, hsl2.s)
+  const score = scoreMatch(distance, relationship, hsl1.s, hsl2.s)
 
   return {
     score,
@@ -112,4 +140,27 @@ export function analyzeMatch(rgb1: RGB, rgb2: RGB): MatchResult {
     color1: { rgb: rgb1, hsl: hsl1, name: name1 },
     color2: { rgb: rgb2, hsl: hsl2, name: name2 },
   }
+}
+
+export function suggestColors(
+  hsl1: HSL,
+  hsl2: HSL,
+): Array<{ name: string; hsl: HSL }> {
+  const avgHue = (hsl1.h + hsl2.h) / 2
+  const saturation = 60
+  const lightness = 50
+
+  const candidates = [
+    { hue: (avgHue + 180) % 360, label: 'complementary' },
+    { hue: (avgHue + 120) % 360, label: 'triadic-1' },
+    { hue: (avgHue + 240) % 360, label: 'triadic-2' },
+  ]
+
+  return candidates.map(({ hue }) => {
+    const hsl: HSL = { h: Math.round(hue), s: saturation, l: lightness }
+    return {
+      name: getColorName(hsl),
+      hsl,
+    }
+  })
 }

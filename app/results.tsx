@@ -8,6 +8,7 @@ import {
 import { useMatchStore } from '@/src/store/useMatchStore'
 import { router } from 'expo-router'
 import { globalStyles, colors } from '@/src/constants/theme'
+import { analyzeMatch, suggestColors } from '@/src/color/engine'
 
 export default function ResultsScreen() {
   const { currentMatch, saveCurrentMatch, clearCurrentMatch } = useMatchStore()
@@ -71,6 +72,33 @@ export default function ResultsScreen() {
         <Text style={styles.viewDetails}>View Details</Text>
       </TouchableOpacity>
 
+      {shouldShowSuggestions(score, relationship) && (
+        <View style={styles.suggestionsContainer}>
+          <Text style={styles.suggestionsHeader}>Not a great match.</Text>
+          <Text style={styles.suggestionsSubtitle}>
+            Add one of these colors to make your wardrobe pop.
+          </Text>
+          {suggestColors(color1.hsl, color2.hsl).map((suggestion, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.suggestionRow,
+                { borderLeftColor: colorFromHsl(suggestion.hsl) },
+              ]}
+              onPress={() => {}}
+            >
+              <View
+                style={[
+                  styles.suggestionSwatch,
+                  { backgroundColor: colorFromHsl(suggestion.hsl) },
+                ]}
+              />
+              <Text style={styles.suggestionText}>Find {suggestion.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
       <View style={styles.tipsContainer}>
         <Text style={styles.tipsHeader}>Helpful Tips</Text>
         <Text style={styles.tipsText}>{getTip(relationship)}</Text>
@@ -112,6 +140,10 @@ function getTip(relationship: string): string {
     default:
       return 'Add a neutral color like white, gray, or navy to tie these colors together.'
   }
+}
+
+function shouldShowSuggestions(score: number, relationship: string): boolean {
+  return score < 60 || relationship === 'neutral'
 }
 
 const styles = StyleSheet.create({
@@ -223,5 +255,41 @@ const styles = StyleSheet.create({
     color: colors.gray,
     textAlign: 'center',
     marginBottom: 24,
+  },
+  suggestionsContainer: {
+    width: '100%',
+    marginBottom: 32,
+  },
+  suggestionsHeader: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.black,
+    marginBottom: 4,
+  },
+  suggestionsSubtitle: {
+    fontSize: 14,
+    color: colors.gray,
+    marginBottom: 16,
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: colors.lightGray,
+    borderRadius: 12,
+    marginBottom: 8,
+    borderLeftWidth: 4,
+  },
+  suggestionSwatch: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  suggestionText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.black,
   },
 })
