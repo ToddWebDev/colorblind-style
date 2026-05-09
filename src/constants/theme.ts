@@ -13,6 +13,7 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingTop: 24,
     backgroundColor: '#fff',
   },
 })

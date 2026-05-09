@@ -24,9 +24,11 @@ export default function TabLayout() {
       <Tabs.Screen
         name='saved'
         options={{
-          title: 'Photos',
+          title: 'Saved Matches',
+          headerShown: true,
+          headerTintColor: '#E05C3A',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name='images-outline' size={size} color={color} />
+            <Ionicons name='bookmark-outline' size={size} color={color} />
           ),
         }}
       />

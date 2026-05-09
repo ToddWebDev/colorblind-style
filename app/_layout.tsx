@@ -1,3 +1,4 @@
+import { initDatabase } from '@/src/db/schema'
 import {
   DarkTheme,
   DefaultTheme,
@@ -20,6 +21,7 @@ SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   useEffect(() => {
+    initDatabase()
     SplashScreen.hideAsync()
   }, [])
 

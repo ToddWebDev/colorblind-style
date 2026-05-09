@@ -164,3 +164,10 @@ export function suggestColors(
     }
   })
 }
+
+export function isPoorMatch(
+  score: number,
+  relationship: ColorRelationship,
+): boolean {
+  return score < 60
+}

@@ -5,13 +5,42 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native'
+import { useNavigation } from 'expo-router'
+import { useLayoutEffect } from 'react'
+import { Ionicons } from '@expo/vector-icons'
 import { useMatchStore } from '@/src/store/useMatchStore'
 import { router } from 'expo-router'
 import { globalStyles, colors } from '@/src/constants/theme'
-import { analyzeMatch, suggestColors } from '@/src/color/engine'
+import { analyzeMatch, suggestColors, isPoorMatch } from '@/src/color/engine'
 
 export default function ResultsScreen() {
   const { currentMatch, saveCurrentMatch, clearCurrentMatch } = useMatchStore()
+  const { score, relationship, color1, color2 } = currentMatch
+
+  const navigation = useNavigation()
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () =>
+        !isPoorMatch(score, relationship) ? (
+          <TouchableOpacity
+            onPress={handleSave}
+            style={{
+              width: 32,
+              height: 32,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons
+              name='bookmark-outline'
+              size={24}
+              color={colors.primary}
+            />
+          </TouchableOpacity>
+        ) : null,
+    })
+  }, [navigation, currentMatch, score, relationship])
 
   if (!currentMatch) {
     return (
@@ -29,8 +58,6 @@ export default function ResultsScreen() {
     )
   }
 
-  const { score, relationship, color1, color2 } = currentMatch
-
   const handleSave = () => {
     saveCurrentMatch()
     router.replace('/(tabs)/saved')
@@ -42,76 +69,72 @@ export default function ResultsScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={globalStyles.container}>
-      <View style={styles.header}>
-        <Text style={styles.scoreLabel}>It's a {score}% Match</Text>
-        <Text style={styles.relationshipLabel}>
-          These colors are {relationship}
-        </Text>
-      </View>
-
-      <View style={styles.vennContainer}>
-        <View
-          style={[
-            styles.circle,
-            { backgroundColor: colorFromHsl(color1.hsl), marginRight: -40 },
-          ]}
-        />
-        <View style={styles.scoreCircle}>
-          <Text style={styles.scoreText}>{score}%</Text>
-        </View>
-        <View
-          style={[
-            styles.circle,
-            { backgroundColor: colorFromHsl(color2.hsl), marginLeft: -40 },
-          ]}
-        />
-      </View>
-
-      <TouchableOpacity onPress={() => router.push('/details')}>
-        <Text style={styles.viewDetails}>View Details</Text>
-      </TouchableOpacity>
-
-      {shouldShowSuggestions(score, relationship) && (
-        <View style={styles.suggestionsContainer}>
-          <Text style={styles.suggestionsHeader}>Not a great match.</Text>
-          <Text style={styles.suggestionsSubtitle}>
-            Add one of these colors to make your wardrobe pop.
+    <View style={styles.screenContainer}>
+      <ScrollView contentContainerStyle={globalStyles.container}>
+        <View style={styles.header}>
+          <Text style={styles.scoreLabel}>It's a {score}% Match</Text>
+          <Text style={styles.relationshipLabel}>
+            These colors are {relationship}
           </Text>
-          {suggestColors(color1.hsl, color2.hsl).map((suggestion, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.suggestionRow,
-                { borderLeftColor: colorFromHsl(suggestion.hsl) },
-              ]}
-              onPress={() => {}}
-            >
-              <View
-                style={[
-                  styles.suggestionSwatch,
-                  { backgroundColor: colorFromHsl(suggestion.hsl) },
-                ]}
-              />
-              <Text style={styles.suggestionText}>Find {suggestion.name}</Text>
-            </TouchableOpacity>
-          ))}
         </View>
-      )}
 
-      <View style={styles.tipsContainer}>
-        <Text style={styles.tipsHeader}>Helpful Tips</Text>
-        <Text style={styles.tipsText}>{getTip(relationship)}</Text>
-      </View>
+        <View style={styles.vennContainer}>
+          <View
+            style={[
+              styles.circle,
+              { backgroundColor: colorFromHsl(color1.hsl), marginRight: -40 },
+            ]}
+          />
+          <View style={styles.scoreCircle}>
+            <Text style={styles.scoreText}>{score}%</Text>
+          </View>
+          <View
+            style={[
+              styles.circle,
+              { backgroundColor: colorFromHsl(color2.hsl), marginLeft: -40 },
+            ]}
+          />
+        </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save Match</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/details')}>
+          <Text style={styles.viewDetails}>View Details</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.newMatchButton} onPress={handleNewMatch}>
-        <Text style={styles.newMatchButtonText}>New Match</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {isPoorMatch(score, relationship) && (
+          <View style={styles.suggestionsContainer}>
+            <Text style={styles.suggestionsHeader}>Not a great match.</Text>
+            <Text style={styles.suggestionsSubtitle}>
+              Try adding one of these colors for a better match.
+            </Text>
+            {suggestColors(color1.hsl, color2.hsl).map((suggestion, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.suggestionRow,
+                  { borderLeftColor: colorFromHsl(suggestion.hsl) },
+                ]}
+                onPress={() => {}}
+              >
+                <View
+                  style={[
+                    styles.suggestionSwatch,
+                    { backgroundColor: colorFromHsl(suggestion.hsl) },
+                  ]}
+                />
+                <Text style={styles.suggestionText}>
+                  Find {suggestion.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        <View style={styles.tipsContainer}>
+          <Text style={styles.tipsHeader}>Helpful Tips</Text>
+          <Text style={styles.tipsText}>{getTip(relationship)}</Text>
+        </View>
+      </ScrollView>
+    </View>
   )
 }
 
@@ -142,11 +165,11 @@ function getTip(relationship: string): string {
   }
 }
 
-function shouldShowSuggestions(score: number, relationship: string): boolean {
-  return score < 60 || relationship === 'neutral'
-}
-
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
   header: {
     alignItems: 'center',
     marginBottom: 32,
@@ -234,19 +257,6 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  newMatchButton: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderRadius: 30,
-    paddingVertical: 16,
-    width: '100%',
-    alignItems: 'center',
-  },
-  newMatchButtonText: {
-    color: colors.primary,
     fontSize: 16,
     fontWeight: '600',
   },

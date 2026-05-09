@@ -1,3 +1,4 @@
+import { insertMatch } from '../db/queries'
 import { create } from 'zustand'
 import { ColorSample, MatchResult } from '../types'
 
@@ -27,6 +28,7 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
   saveCurrentMatch: () => {
     const { currentMatch, savedMatches } = get()
     if (!currentMatch) return
+    insertMatch(currentMatch)
     set({ savedMatches: [currentMatch, ...savedMatches] })
   },
 

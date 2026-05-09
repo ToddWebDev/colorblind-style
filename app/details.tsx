@@ -1,3 +1,6 @@
+import { useNavigation } from 'expo-router'
+import { useLayoutEffect } from 'react'
+import { Ionicons } from '@expo/vector-icons'
 import {
   StyleSheet,
   View,
@@ -7,10 +10,41 @@ import {
 } from 'react-native'
 import { router } from 'expo-router'
 import { useMatchStore } from '@/src/store/useMatchStore'
+import { isPoorMatch } from '@/src/color/engine'
 import { globalStyles, colors } from '@/src/constants/theme'
 
 export default function DetailsScreen() {
-  const { currentMatch } = useMatchStore()
+  const navigation = useNavigation()
+  const { currentMatch, saveCurrentMatch } = useMatchStore()
+  const { score, relationship, color1, color2 } = currentMatch
+
+  const handleSave = () => {
+    saveCurrentMatch()
+    router.replace('/(tabs)/saved')
+  }
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () =>
+        !isPoorMatch(score, relationship) ? (
+          <TouchableOpacity
+            onPress={handleSave}
+            style={{
+              width: 32,
+              height: 32,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons
+              name='bookmark-outline'
+              size={24}
+              color={colors.primary}
+            />
+          </TouchableOpacity>
+        ) : null,
+    })
+  }, [navigation, currentMatch, score, relationship])
 
   if (!currentMatch) {
     return (
@@ -22,8 +56,6 @@ export default function DetailsScreen() {
       </View>
     )
   }
-
-  const { score, relationship, color1, color2 } = currentMatch
 
   return (
     <ScrollView contentContainerStyle={globalStyles.container}>
