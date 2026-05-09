@@ -1,31 +1,45 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native'
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
-
-export default function TabOneScreen() {
+export default function CameraScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+      <View style={styles.viewfinder}>
+        <View style={styles.crosshair} />
+      </View>
+      <View style={styles.toolbar}>
+        <Text style={styles.instruction}>
+          Hold the target over what you want to wear
+        </Text>
+      </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
+  },
+  viewfinder: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  crosshair: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  toolbar: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 20,
+    alignItems: 'center',
   },
-});
+  instruction: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+})
