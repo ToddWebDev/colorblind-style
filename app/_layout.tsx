@@ -31,9 +31,27 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-        <Stack.Screen name='results' options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerBackTitle: '' }}>
+        <Stack.Screen
+          name='(tabs)'
+          options={{ headerShown: false, title: 'Home', headerBackTitle: '' }}
+        />
+        <Stack.Screen
+          name='results'
+          options={{
+            headerShown: true,
+            title: 'Color Match Result',
+            headerTintColor: '#E05C3A',
+          }}
+        />
+        <Stack.Screen
+          name='details'
+          options={{
+            headerShown: true,
+            title: 'Match Details',
+            headerTintColor: '#E05C3A',
+          }}
+        />
       </Stack>
     </ThemeProvider>
   )

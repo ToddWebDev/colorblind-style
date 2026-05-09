@@ -1,6 +1,20 @@
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native'
+import { router } from 'expo-router'
+import { useMatchStore } from '@/src/store/useMatchStore'
+import { analyzeMatch } from '@/src/color/engine'
 
 export default function CameraScreen() {
+  const { setCurrentMatch } = useMatchStore()
+
+  const simulateMatch = () => {
+    const result = analyzeMatch(
+      { r: 204, g: 173, b: 82 },
+      { r: 210, g: 105, b: 80 },
+    )
+    setCurrentMatch(result)
+    router.push('/results')
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.viewfinder}>
@@ -10,6 +24,9 @@ export default function CameraScreen() {
         <Text style={styles.instruction}>
           Hold the target over what you want to wear
         </Text>
+        <TouchableOpacity style={styles.simulateButton} onPress={simulateMatch}>
+          <Text style={styles.simulateButtonText}>Simulate Match (Dev)</Text>
+        </TouchableOpacity>
       </View>
     </View>
   )
@@ -36,10 +53,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 20,
     alignItems: 'center',
+    gap: 16,
   },
   instruction: {
     color: '#fff',
     fontSize: 16,
     textAlign: 'center',
+  },
+  simulateButton: {
+    backgroundColor: '#E05C3A',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+  },
+  simulateButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 })
