@@ -20,6 +20,8 @@ export const globalStyles = StyleSheet.create({
 
 export const colors = {
   primary: '#E05C3A',
+  secondary: '#1A5276',
+  tertiary: '#F5CBA7',
   black: '#1a1a1a',
   gray: '#888',
   lightGray: '#f8f8f8',
