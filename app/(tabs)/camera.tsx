@@ -1,11 +1,37 @@
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native'
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  Easing,
+} from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useEffect, useRef } from 'react'
 import { router } from 'expo-router'
-import { useMatchStore } from '@/src/store/useMatchStore'
-import { analyzeMatch } from '@/src/color/engine'
+import { useColorSampler } from '@/src/hooks/useColorSampler'
+import { colors } from '@/src/constants/theme'
+
+const MOCK_COLORS = [
+  { r: 204, g: 173, b: 82 },
+  { r: 210, g: 105, b: 80 },
+  { r: 30, g: 100, b: 200 },
+  { r: 34, g: 139, b: 34 },
+]
+
+function colorFromHsl({
+  h,
+  s,
+  l,
+}: {
+  h: number
+  s: number
+  l: number
+}): string {
+  return `hsl(${h}, ${s}%, ${l}%)`
+}
 
 export default function CameraScreen() {
-  const { setCurrentMatch } = useMatchStore()
-
   // Analogous Match Simulation
   // const simulateMatch = () => {
   //   const result = analyzeMatch(
@@ -47,29 +73,154 @@ export default function CameraScreen() {
   // }
 
   // Poor Match Simulation
-  const simulateMatch = () => {
-    const result = analyzeMatch(
-      { r: 128, g: 128, b: 128 },
-      { r: 140, g: 130, b: 125 },
-    )
-    setCurrentMatch(result)
-    router.push('/results')
+  // const simulateMatch = () => {
+  //   const result = analyzeMatch(
+  //     { r: 128, g: 128, b: 128 },
+  //     { r: 140, g: 130, b: 125 },
+  //   )
+  //   setCurrentMatch(result)
+  //   router.push('/results')
+  // }
+
+  const {
+    cameraState,
+    liveColorName,
+    color1,
+    startAcquiring,
+    cancelAcquiring,
+    simulateLiveSampling,
+    reset,
+  } = useColorSampler()
+
+  const pulseAnim = useRef(new Animated.Value(1)).current
+  const pulseLoop = useRef<Animated.CompositeAnimation | null>(null)
+
+  useEffect(() => {
+    if (cameraState === 'acquiring_1' || cameraState === 'acquiring_2') {
+      pulseLoop.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.4,
+            duration: 500,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 500,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+      )
+      pulseLoop.current.start()
+    } else {
+      pulseLoop.current?.stop()
+      pulseAnim.setValue(1)
+    }
+  }, [cameraState])
+
+  useEffect(() => {
+    if (cameraState === 'color2_locked') {
+      router.push('/results')
+    }
+  }, [cameraState])
+
+  const handleMockPress = (index: number) => {
+    const target = MOCK_COLORS[index % MOCK_COLORS.length]
+    simulateLiveSampling(target)
+    startAcquiring(target)
   }
 
+  const isAcquiring =
+    cameraState === 'acquiring_1' || cameraState === 'acquiring_2'
+  const isLocked1 =
+    cameraState === 'color1_locked' ||
+    cameraState === 'acquiring_2' ||
+    cameraState === 'color2_locked'
+
   return (
-    <View style={styles.container}>
-      <View style={styles.viewfinder}>
-        <View style={styles.crosshair} />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.container}>
+        {/* Low light warning */}
+        {cameraState === 'low_light' && (
+          <View style={styles.warningBanner}>
+            <Text style={styles.warningText}>Turn your lights on</Text>
+          </View>
+        )}
+
+        {/* Hold steady banner */}
+        {isAcquiring && (
+          <View style={styles.holdBanner}>
+            <Text style={styles.holdText}>Hold Steady</Text>
+          </View>
+        )}
+
+        {/* Color 1 badge */}
+        {color1 && (
+          <View
+            style={[
+              styles.colorBadge,
+              { backgroundColor: colorFromHsl(color1.hsl) },
+            ]}
+          >
+            <Text style={styles.colorBadgeText}>{color1.name}</Text>
+          </View>
+        )}
+
+        {/* Viewfinder */}
+        <View style={styles.viewfinder}>
+          <Animated.View
+            style={[
+              styles.crosshair,
+              { transform: [{ scale: pulseAnim }] },
+              isAcquiring && styles.crosshairAcquiring,
+            ]}
+          />
+          {liveColorName ? (
+            <Text style={styles.liveColorName}>{liveColorName}</Text>
+          ) : null}
+        </View>
+
+        {/* Status bar */}
+        <View
+          style={[styles.statusBar, isAcquiring && styles.statusBarAcquiring]}
+        >
+          <Text style={styles.statusText}>
+            {isAcquiring
+              ? 'Acquiring Color...'
+              : cameraState === 'color1_locked'
+                ? 'Hold the target over something else to wear'
+                : 'Hold the target over what you want to wear'}
+          </Text>
+        </View>
+
+        {/* Bottom nav */}
+        <View style={styles.bottomNav}>
+          <View style={styles.colorDots}>
+            <TouchableOpacity
+              style={[
+                styles.colorDot,
+                isLocked1 && color1
+                  ? { backgroundColor: colorFromHsl(color1.hsl) }
+                  : styles.colorDotEmpty,
+              ]}
+              onPress={() => handleMockPress(0)}
+            >
+              {isLocked1 && <Text style={styles.checkmark}>✓</Text>}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.colorDot, styles.colorDotEmpty]}
+              onPress={() => handleMockPress(1)}
+            >
+              {cameraState === 'color2_locked' && (
+                <Text style={styles.checkmark}>✓</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
-      <View style={styles.toolbar}>
-        <Text style={styles.instruction}>
-          Hold the target over what you want to wear
-        </Text>
-        <TouchableOpacity style={styles.simulateButton} onPress={simulateMatch}>
-          <Text style={styles.simulateButtonText}>Simulate Match (Dev)</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -78,38 +229,102 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  warningBanner: {
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  warningText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  holdBanner: {
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  holdText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  colorBadge: {
+    alignSelf: 'center',
+    marginTop: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  colorBadgeText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.white,
+  },
   viewfinder: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  crosshair: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  toolbar: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    padding: 20,
-    alignItems: 'center',
     gap: 16,
   },
-  instruction: {
-    color: '#fff',
+  crosshair: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: colors.white,
+  },
+  crosshairAcquiring: {
+    borderColor: colors.tertiary,
+  },
+  liveColorName: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '600',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusBar: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  statusBarAcquiring: {
+    backgroundColor: colors.secondary,
+  },
+  statusText: {
+    color: colors.white,
     fontSize: 16,
     textAlign: 'center',
   },
-  simulateButton: {
-    backgroundColor: '#E05C3A',
-    borderRadius: 20,
-    paddingVertical: 10,
+  bottomNav: {
+    backgroundColor: colors.white,
+    paddingVertical: 12,
     paddingHorizontal: 24,
   },
-  simulateButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  colorDots: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  colorDot: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorDotEmpty: {
+    backgroundColor: 'rgba(200,200,200,0.4)',
+  },
+  checkmark: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: '700',
   },
 })
