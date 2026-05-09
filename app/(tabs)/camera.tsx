@@ -85,6 +85,7 @@ export default function CameraScreen() {
   const {
     cameraState,
     liveColorName,
+    liveHsl,
     color1,
     startAcquiring,
     cancelAcquiring,
@@ -94,6 +95,19 @@ export default function CameraScreen() {
 
   const pulseAnim = useRef(new Animated.Value(1)).current
   const pulseLoop = useRef<Animated.CompositeAnimation | null>(null)
+  const badgeOpacity = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    if (color1) {
+      Animated.timing(badgeOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start()
+    } else {
+      badgeOpacity.setValue(0)
+    }
+  }, [color1])
 
   useEffect(() => {
     if (cameraState === 'acquiring_1' || cameraState === 'acquiring_2') {
@@ -158,14 +172,17 @@ export default function CameraScreen() {
 
         {/* Color 1 badge */}
         {color1 && (
-          <View
+          <Animated.View
             style={[
               styles.colorBadge,
-              { backgroundColor: colorFromHsl(color1.hsl) },
+              {
+                backgroundColor: colorFromHsl(color1.hsl),
+                opacity: badgeOpacity,
+              },
             ]}
           >
             <Text style={styles.colorBadgeText}>{color1.name}</Text>
-          </View>
+          </Animated.View>
         )}
 
         {/* Viewfinder */}
@@ -174,7 +191,9 @@ export default function CameraScreen() {
             style={[
               styles.crosshair,
               { transform: [{ scale: pulseAnim }] },
-              isAcquiring && styles.crosshairAcquiring,
+              liveHsl
+                ? { borderColor: colorFromHsl(liveHsl) }
+                : { borderColor: colors.white },
             ]}
           />
           {liveColorName ? (

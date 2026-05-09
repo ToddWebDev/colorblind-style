@@ -11,6 +11,11 @@ export function useColorSampler() {
   const [cameraState, setCameraState] = useState<CameraState>('idle')
   const [liveColorName, setLiveColorName] = useState<string>('')
   const [color1, setColor1] = useState<ColorSample | null>(null)
+  const [liveHsl, setLiveHsl] = useState<{
+    h: number
+    s: number
+    l: number
+  } | null>(null)
   const acquiringTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const sampleTimer = useRef<ReturnType<typeof setInterval> | null>(null)
   const { setCurrentMatch } = useMatchStore()
@@ -22,6 +27,7 @@ export function useColorSampler() {
         const hsl = rgbToHsl(targetRgb)
         const name = getColorName(hsl)
         setLiveColorName(name)
+        setLiveHsl(hsl)
       }, SAMPLE_INTERVAL)
     },
     [],
@@ -79,6 +85,7 @@ export function useColorSampler() {
   return {
     cameraState,
     liveColorName,
+    liveHsl,
     color1,
     startAcquiring,
     cancelAcquiring,
