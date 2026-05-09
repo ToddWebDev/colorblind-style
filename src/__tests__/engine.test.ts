@@ -43,7 +43,7 @@ describe('hueDistance', () => {
 
 describe('classifyRelationship', () => {
   it('classifies analogous', () => {
-    expect(classifyRelationship(20, 60, 60)).toBe('analogous')
+    expect(classifyRelationship(35, 60, 60)).toBe('analogous')
   })
 
   it('classifies complementary', () => {
@@ -52,6 +52,10 @@ describe('classifyRelationship', () => {
 
   it('classifies triadic', () => {
     expect(classifyRelationship(120, 60, 60)).toBe('triadic')
+  })
+
+  it('classifies split-complementary', () => {
+    expect(classifyRelationship(155, 60, 60)).toBe('split-complementary')
   })
 
   it('classifies neutral by distance', () => {

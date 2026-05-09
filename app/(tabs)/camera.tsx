@@ -6,25 +6,55 @@ import { analyzeMatch } from '@/src/color/engine'
 export default function CameraScreen() {
   const { setCurrentMatch } = useMatchStore()
 
-  // Good Match Simulation
-  const simulateMatch = () => {
-    const result = analyzeMatch(
-      { r: 204, g: 173, b: 82 },
-      { r: 210, g: 105, b: 80 },
-    )
-    setCurrentMatch(result)
-    router.push('/results')
-  }
-
-  // Poor Match Simulation
+  // Analogous Match Simulation
   // const simulateMatch = () => {
   //   const result = analyzeMatch(
-  //     { r: 128, g: 128, b: 128 },
-  //     { r: 140, g: 130, b: 125 },
+  //     { r: 204, g: 173, b: 82 }, // Mustard
+  //     { r: 210, g: 105, b: 80 }, // Coral
   //   )
   //   setCurrentMatch(result)
   //   router.push('/results')
   // }
+
+  // Complementary Match Simulation
+  // const simulateMatch = () => {
+  //   const result = analyzeMatch(
+  //     { r: 30, g: 100, b: 200 }, // Blue ~H:210
+  //     { r: 220, g: 120, b: 30 }, // Orange ~H:30
+  //   )
+  //   setCurrentMatch(result)
+  //   router.push('/results')
+  // }
+
+  // Triadic Match Simulation
+  // const simulateMatch = () => {
+  //   const result = analyzeMatch(
+  //     { r: 220, g: 60, b: 60 }, // Red
+  //     { r: 60, g: 60, b: 220 }, // Blue
+  //   )
+  //   setCurrentMatch(result)
+  //   router.push('/results')
+  // }
+
+  // Split-complementary Match Simulation
+  // const simulateMatch = () => {
+  //   const result = analyzeMatch(
+  //     { r: 30, g: 100, b: 200 }, // Blue ~H:210
+  //     { r: 220, g: 200, b: 30 }, // Yellow-green ~H:55
+  //   )
+  //   setCurrentMatch(result)
+  //   router.push('/results')
+  // }
+
+  // Poor Match Simulation
+  const simulateMatch = () => {
+    const result = analyzeMatch(
+      { r: 128, g: 128, b: 128 },
+      { r: 140, g: 130, b: 125 },
+    )
+    setCurrentMatch(result)
+    router.push('/results')
+  }
 
   return (
     <View style={styles.container}>

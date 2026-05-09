@@ -91,12 +91,12 @@ export function classifyRelationship(
   s1: number,
   s2: number,
 ): ColorRelationship {
-  const avgSaturation = (s1 + s2) / 2
-  if (avgSaturation < 15) return 'neutral'
-  if (distance <= 30) return 'analogous'
-  if (distance >= 150 && distance <= 210) return 'complementary'
-  if (distance >= 110 && distance <= 130) return 'triadic'
-  if (distance >= 140 && distance <= 150) return 'split-complementary'
+  if (s1 < 15 && s2 < 15) return 'neutral'
+  if (distance <= 40) return 'analogous'
+  if (distance >= 170 && distance <= 190) return 'complementary'
+  if (distance >= 115 && distance <= 135) return 'triadic'
+  if (distance >= 141 && distance <= 169) return 'split-complementary'
+  if (distance >= 191 && distance <= 220) return 'split-complementary'
   return 'neutral'
 }
 
@@ -133,6 +133,15 @@ export function analyzeMatch(rgb1: RGB, rgb2: RGB): MatchResult {
   const distance = hueDistance(hsl1.h, hsl2.h)
   const relationship = classifyRelationship(distance, hsl1.s, hsl2.s)
   const score = scoreMatch(distance, relationship, hsl1.s, hsl2.s)
+
+  console.log(
+    'distance:',
+    distance,
+    'relationship:',
+    relationship,
+    'score:',
+    score,
+  )
 
   return {
     score,
