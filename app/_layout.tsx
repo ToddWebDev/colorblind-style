@@ -41,6 +41,15 @@ function RootLayoutNav() {
           options={{ headerShown: false, title: 'Home', headerBackTitle: '' }}
         />
         <Stack.Screen
+          name='color-detail'
+          options={{
+            headerShown: true,
+            title: 'Color Identified',
+            headerTintColor: '#E05C3A',
+            headerBackTitle: '',
+          }}
+        />
+        <Stack.Screen
           name='results'
           options={{
             headerShown: true,

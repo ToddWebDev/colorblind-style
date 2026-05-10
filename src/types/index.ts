@@ -1,3 +1,11 @@
+export type CameraState =
+  | 'idle'
+  | 'acquiring_1'
+  | 'color1_locked'
+  | 'acquiring_2'
+  | 'color2_locked'
+  | 'low_light'
+
 export type RGB = {
   r: number
   g: number
@@ -28,20 +36,5 @@ export type MatchResult = {
   relationship: ColorRelationship
   color1: ColorSample
   color2: ColorSample
-}
-
-export type MatchResult = {
-  score: number
-  relationship: ColorRelationship
-  color1: ColorSample
-  color2: ColorSample
   createdAt?: number
 }
-
-export type CameraState =
-  | 'idle'
-  | 'acquiring_1'
-  | 'color1_locked'
-  | 'acquiring_2'
-  | 'color2_locked'
-  | 'low_light'

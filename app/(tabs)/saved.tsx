@@ -7,9 +7,8 @@ import {
 } from 'react-native'
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useState } from 'react'
-import { fetchMatches, deleteMatch } from '@/src/db/queries'
-import { MatchResult } from '@/src/types'
-import { colors, globalStyles } from '@/src/constants/theme'
+import { fetchMatches, deleteEntry, SavedEntry } from '@/src/db/queries'
+import { colors } from '@/src/constants/theme'
 
 function colorFromHsl({
   h,
@@ -24,21 +23,21 @@ function colorFromHsl({
 }
 
 export default function SavedScreen() {
-  const [matches, setMatches] = useState<MatchResult[]>([])
+  const [entries, setEntries] = useState<SavedEntry[]>([])
 
-  const loadMatches = useCallback(() => {
+  const loadEntries = useCallback(() => {
     const data = fetchMatches()
-    setMatches(data)
+    setEntries(data)
   }, [])
 
-  useFocusEffect(loadMatches)
+  useFocusEffect(loadEntries)
 
-  if (matches.length === 0) {
+  if (entries.length === 0) {
     return (
-      <View style={globalStyles.centered}>
-        <Text style={styles.emptyText}>No saved matches yet.</Text>
+      <View style={styles.centered}>
+        <Text style={styles.emptyText}>No saved colors or matches yet.</Text>
         <Text style={styles.emptySubtext}>
-          Save a match from the results screen to see it here.
+          Save a color or match to see it here.
         </Text>
       </View>
     )
@@ -46,27 +45,27 @@ export default function SavedScreen() {
 
   return (
     <FlatList
-      data={matches}
-      keyExtractor={(_, index) => index.toString()}
+      data={entries}
+      keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={styles.list}
       renderItem={({ item }) => (
-        <MatchRow match={item} onDelete={loadMatches} />
+        <EntryRow entry={item} onDelete={loadEntries} />
       )}
     />
   )
 }
 
-function MatchRow({
-  match,
+function EntryRow({
+  entry,
   onDelete,
 }: {
-  match: MatchResult
+  entry: SavedEntry
   onDelete: () => void
 }) {
   const [showDelete, setShowDelete] = useState(false)
 
   const handleDelete = () => {
-    deleteMatch(match.score, match.createdAt ?? 0)
+    deleteEntry(entry.id)
     onDelete()
   }
 
@@ -80,23 +79,34 @@ function MatchRow({
         <View
           style={[
             styles.swatch,
-            { backgroundColor: colorFromHsl(match.color1.hsl) },
+            { backgroundColor: colorFromHsl(entry.color1.hsl) },
           ]}
         />
-        <View
-          style={[
-            styles.swatch,
-            { backgroundColor: colorFromHsl(match.color2.hsl) },
-          ]}
-        />
+        {entry.color2 && (
+          <View
+            style={[
+              styles.swatch,
+              { backgroundColor: colorFromHsl(entry.color2.hsl) },
+            ]}
+          />
+        )}
       </View>
       <View style={styles.info}>
-        <Text style={styles.colorNames}>
-          {match.color1.name} + {match.color2.name}
-        </Text>
-        <Text style={styles.score}>
-          {match.score}% Match · {match.relationship}
-        </Text>
+        {entry.type === 'single' ? (
+          <>
+            <Text style={styles.colorNames}>{entry.color1.name}</Text>
+            <Text style={styles.score}>Color ID</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.colorNames}>
+              {entry.color1.name} + {entry.color2?.name}
+            </Text>
+            <Text style={styles.score}>
+              {entry.score}% Match · {entry.relationship}
+            </Text>
+          </>
+        )}
       </View>
       {showDelete && (
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
@@ -109,10 +119,18 @@ function MatchRow({
 
 const styles = StyleSheet.create({
   list: {
-    padding: 24,
+    padding: 16,
     paddingTop: 24,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     flexGrow: 1,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    backgroundColor: colors.white,
   },
   row: {
     flexDirection: 'row',

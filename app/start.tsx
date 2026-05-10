@@ -18,7 +18,8 @@ const CARDS = [
   {
     icon: 'camera-outline',
     title: 'Point your camera',
-    description: 'Aim the crosshair at any clothing item in your wardrobe.',
+    description:
+      'Point at any clothing item in your closet or while shopping for something new.',
   },
   {
     icon: 'color-palette-outline',

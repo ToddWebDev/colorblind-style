@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
-import { CameraState } from '../types'
+import { router } from 'expo-router'
 import { ColorSample } from '../types'
 import { rgbToHsl, getColorName, analyzeMatch } from '../color/engine'
 import { useMatchStore } from '../store/useMatchStore'
@@ -8,9 +8,15 @@ const ACQUIRING_DURATION = 1500
 const SAMPLE_INTERVAL = 100
 
 export function useColorSampler() {
-  const [cameraState, setCameraState] = useState<CameraState>('idle')
+  const {
+    cameraState,
+    setCameraState,
+    color1: storedColor1,
+    setColor1: storeSetColor1,
+    setCurrentMatch,
+  } = useMatchStore()
+
   const [liveColorName, setLiveColorName] = useState<string>('')
-  const [color1, setColor1] = useState<ColorSample | null>(null)
   const [liveHsl, setLiveHsl] = useState<{
     h: number
     s: number
@@ -18,7 +24,6 @@ export function useColorSampler() {
   } | null>(null)
   const acquiringTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const sampleTimer = useRef<ReturnType<typeof setInterval> | null>(null)
-  const { setCurrentMatch } = useMatchStore()
 
   const simulateLiveSampling = useCallback(
     (targetRgb: { r: number; g: number; b: number }) => {
@@ -35,6 +40,13 @@ export function useColorSampler() {
 
   const startAcquiring = useCallback(
     (targetRgb: { r: number; g: number; b: number }) => {
+      console.log(
+        'startAcquiring called, cameraState:',
+        cameraState,
+        'storedColor1:',
+        storedColor1?.name,
+      )
+
       if (cameraState === 'idle') {
         setCameraState('acquiring_1')
       } else if (cameraState === 'color1_locked') {
@@ -49,15 +61,16 @@ export function useColorSampler() {
         const sample: ColorSample = { rgb: targetRgb, hsl, name }
 
         if (cameraState === 'idle' || cameraState === 'acquiring_1') {
-          setColor1(sample)
+          storeSetColor1(sample)
           setCameraState('color1_locked')
           if (sampleTimer.current) clearInterval(sampleTimer.current)
+          router.push('/color-detail')
         } else if (
           cameraState === 'color1_locked' ||
           cameraState === 'acquiring_2'
         ) {
-          if (color1) {
-            const result = analyzeMatch(targetRgb, color1.rgb)
+          if (storedColor1) {
+            const result = analyzeMatch(targetRgb, storedColor1.rgb)
             setCurrentMatch(result)
             setCameraState('color2_locked')
             if (sampleTimer.current) clearInterval(sampleTimer.current)
@@ -65,28 +78,34 @@ export function useColorSampler() {
         }
       }, ACQUIRING_DURATION)
     },
-    [cameraState, color1, setCurrentMatch],
+    [
+      cameraState,
+      storedColor1,
+      setCurrentMatch,
+      storeSetColor1,
+      setCameraState,
+    ],
   )
 
   const cancelAcquiring = useCallback(() => {
     if (acquiringTimer.current) clearTimeout(acquiringTimer.current)
     if (cameraState === 'acquiring_1') setCameraState('idle')
     if (cameraState === 'acquiring_2') setCameraState('color1_locked')
-  }, [cameraState])
+  }, [cameraState, setCameraState])
 
   const reset = useCallback(() => {
     if (acquiringTimer.current) clearTimeout(acquiringTimer.current)
     if (sampleTimer.current) clearInterval(sampleTimer.current)
     setCameraState('idle')
     setLiveColorName('')
-    setColor1(null)
-  }, [])
+    setLiveHsl(null)
+  }, [setCameraState])
 
   return {
     cameraState,
     liveColorName,
     liveHsl,
-    color1,
+    storedColor1,
     startAcquiring,
     cancelAcquiring,
     simulateLiveSampling,

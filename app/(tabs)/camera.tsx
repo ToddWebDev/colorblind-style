@@ -86,7 +86,7 @@ export default function CameraScreen() {
     cameraState,
     liveColorName,
     liveHsl,
-    color1,
+    storedColor1,
     startAcquiring,
     cancelAcquiring,
     simulateLiveSampling,
@@ -98,7 +98,7 @@ export default function CameraScreen() {
   const badgeOpacity = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    if (color1) {
+    if (storedColor1) {
       Animated.timing(badgeOpacity, {
         toValue: 1,
         duration: 200,
@@ -107,7 +107,7 @@ export default function CameraScreen() {
     } else {
       badgeOpacity.setValue(0)
     }
-  }, [color1])
+  }, [storedColor1])
 
   useEffect(() => {
     if (cameraState === 'acquiring_1' || cameraState === 'acquiring_2') {
@@ -140,18 +140,17 @@ export default function CameraScreen() {
     }
   }, [cameraState])
 
-  const handleMockPress = (index: number) => {
-    const target = MOCK_COLORS[index % MOCK_COLORS.length]
+  const mockIndex = useRef(0)
+
+  const handleMockPress = () => {
+    const index = cameraState === 'color1_locked' ? 1 : 0
+    const target = MOCK_COLORS[index]
     simulateLiveSampling(target)
     startAcquiring(target)
   }
 
   const isAcquiring =
     cameraState === 'acquiring_1' || cameraState === 'acquiring_2'
-  const isLocked1 =
-    cameraState === 'color1_locked' ||
-    cameraState === 'acquiring_2' ||
-    cameraState === 'color2_locked'
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -171,17 +170,17 @@ export default function CameraScreen() {
         )}
 
         {/* Color 1 badge */}
-        {color1 && (
+        {storedColor1 && (
           <Animated.View
             style={[
               styles.colorBadge,
               {
-                backgroundColor: colorFromHsl(color1.hsl),
+                backgroundColor: colorFromHsl(storedColor1.hsl),
                 opacity: badgeOpacity,
               },
             ]}
           >
-            <Text style={styles.colorBadgeText}>{color1.name}</Text>
+            <Text style={styles.colorBadgeText}>{storedColor1.name}</Text>
           </Animated.View>
         )}
 
@@ -190,53 +189,23 @@ export default function CameraScreen() {
           <Animated.View
             style={[
               styles.crosshair,
-              { transform: [{ scale: pulseAnim }] },
-              liveHsl
-                ? { borderColor: colorFromHsl(liveHsl) }
-                : { borderColor: colors.white },
+              {
+                transform: [{ scale: pulseAnim }],
+                borderWidth: 2,
+                borderColor: liveHsl ? colorFromHsl(liveHsl) : colors.white,
+              },
             ]}
           />
           {liveColorName ? (
             <Text style={styles.liveColorName}>{liveColorName}</Text>
           ) : null}
-        </View>
 
-        {/* Status bar */}
-        <View
-          style={[styles.statusBar, isAcquiring && styles.statusBarAcquiring]}
-        >
-          <Text style={styles.statusText}>
-            {isAcquiring
-              ? 'Acquiring Color...'
-              : cameraState === 'color1_locked'
-                ? 'Hold the target over something else to wear'
-                : 'Hold the target over what you want to wear'}
-          </Text>
-        </View>
-
-        {/* Bottom nav */}
-        <View style={styles.bottomNav}>
-          <View style={styles.colorDots}>
-            <TouchableOpacity
-              style={[
-                styles.colorDot,
-                isLocked1 && color1
-                  ? { backgroundColor: colorFromHsl(color1.hsl) }
-                  : styles.colorDotEmpty,
-              ]}
-              onPress={() => handleMockPress(0)}
-            >
-              {isLocked1 && <Text style={styles.checkmark}>✓</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.colorDot, styles.colorDotEmpty]}
-              onPress={() => handleMockPress(1)}
-            >
-              {cameraState === 'color2_locked' && (
-                <Text style={styles.checkmark}>✓</Text>
-              )}
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={styles.simulateButton}
+            onPress={() => handleMockPress(0)}
+          >
+            <Text style={styles.simulateButtonText}>Simulate Color (Dev)</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -319,31 +288,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  bottomNav: {
-    backgroundColor: colors.white,
-    paddingVertical: 12,
+  simulateButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    paddingVertical: 10,
     paddingHorizontal: 24,
+    marginTop: 24,
   },
-  colorDots: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  colorDot: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  colorDotEmpty: {
-    backgroundColor: 'rgba(200,200,200,0.4)',
-  },
-  checkmark: {
+  simulateButtonText: {
     color: colors.white,
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
   },
 })
