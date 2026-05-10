@@ -8,6 +8,7 @@ import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 import 'react-native-reanimated'
+import { colors } from '@/src/constants/theme'
 
 import { useColorScheme } from '@/components/useColorScheme'
 
@@ -45,7 +46,7 @@ function RootLayoutNav() {
           options={{
             headerShown: true,
             title: 'Color Identified',
-            headerTintColor: '#E05C3A',
+            headerTintColor: colors.primary,
             headerBackTitle: '',
           }}
         />
@@ -54,7 +55,7 @@ function RootLayoutNav() {
           options={{
             headerShown: true,
             title: 'Color Match Result',
-            headerTintColor: '#E05C3A',
+            headerTintColor: colors.primary,
           }}
         />
         <Stack.Screen
@@ -62,7 +63,7 @@ function RootLayoutNav() {
           options={{
             headerShown: true,
             title: 'Match Details',
-            headerTintColor: '#E05C3A',
+            headerTintColor: colors.primary,
           }}
         />
       </Stack>

@@ -207,6 +207,23 @@ export default function CameraScreen() {
             <Text style={styles.simulateButtonText}>Simulate Color (Dev)</Text>
           </TouchableOpacity>
         </View>
+
+        {(cameraState === 'color1_locked' || cameraState === 'acquiring_2') &&
+          storedColor1 && (
+            <View style={styles.bottomNav}>
+              <View style={styles.colorDots}>
+                <View
+                  style={[
+                    styles.colorDot,
+                    { backgroundColor: colorFromHsl(storedColor1.hsl) },
+                  ]}
+                >
+                  <Text style={styles.checkmark}>✓</Text>
+                </View>
+                <View style={[styles.colorDot, styles.colorDotEmpty]} />
+              </View>
+            </View>
+          )}
       </View>
     </SafeAreaView>
   )
@@ -287,6 +304,36 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 16,
     textAlign: 'center',
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  colorDots: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  colorDot: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  colorDotEmpty: {
+    backgroundColor: 'rgba(200,200,200,0.4)',
+  },
+  checkmark: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: '700',
   },
   simulateButton: {
     backgroundColor: colors.primary,

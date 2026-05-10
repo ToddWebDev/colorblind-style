@@ -104,7 +104,7 @@ export default function ResultsScreen() {
           <View style={styles.suggestionsContainer}>
             <Text style={styles.suggestionsHeader}>Not a great match.</Text>
             <Text style={styles.suggestionsSubtitle}>
-              Try adding one of these colors for a better match.
+              One of these colors would pair well with what you have.
             </Text>
             {suggestColors(color1.hsl, color2.hsl).map((suggestion, index) => (
               <TouchableOpacity

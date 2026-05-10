@@ -23,6 +23,17 @@ export default function ColorDetailScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => {
+            handleDone()
+            router.replace('/(tabs)/camera')
+          }}
+          style={{ marginLeft: 8 }}
+        >
+          <Ionicons name='chevron-back' size={24} color={colors.primary} />
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <TouchableOpacity
           onPress={() => {
