@@ -13,7 +13,7 @@ import { useMatchStore } from '@/src/store/useMatchStore'
 import { isPoorMatch } from '@/src/color/engine'
 import { globalStyles, colors } from '@/src/constants/theme'
 
-export default function DetailsScreen() {
+export default function ColorMatchDetailsScreen() {
   const navigation = useNavigation()
   const { currentMatch, saveCurrentMatch } = useMatchStore()
   const { score, relationship, color1, color2 } = currentMatch

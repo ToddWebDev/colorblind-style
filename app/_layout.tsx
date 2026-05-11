@@ -51,7 +51,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name='results'
+          name='color-match-results'
           options={{
             headerShown: true,
             title: 'Color Match Result',
@@ -59,7 +59,7 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name='details'
+          name='color-match-details'
           options={{
             headerShown: true,
             title: 'Match Details',

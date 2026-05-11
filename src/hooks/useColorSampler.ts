@@ -64,16 +64,17 @@ export function useColorSampler() {
           storeSetColor1(sample)
           setCameraState('color1_locked')
           if (sampleTimer.current) clearInterval(sampleTimer.current)
-          router.push('/color-detail')
+          router.replace('/color-detail')
         } else if (
           cameraState === 'color1_locked' ||
           cameraState === 'acquiring_2'
         ) {
           if (storedColor1) {
-            const result = analyzeMatch(targetRgb, storedColor1.rgb)
+            const result = analyzeMatch(storedColor1.rgb, targetRgb)
             setCurrentMatch(result)
             setCameraState('color2_locked')
             if (sampleTimer.current) clearInterval(sampleTimer.current)
+            router.replace('/color-match-results')
           }
         }
       }, ACQUIRING_DURATION)

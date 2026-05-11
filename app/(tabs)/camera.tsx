@@ -7,7 +7,7 @@ import {
   Easing,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { router } from 'expo-router'
 import { useColorSampler } from '@/src/hooks/useColorSampler'
 import { colors } from '@/src/constants/theme'
@@ -39,7 +39,7 @@ export default function CameraScreen() {
   //     { r: 210, g: 105, b: 80 }, // Coral
   //   )
   //   setCurrentMatch(result)
-  //   router.push('/results')
+  //   router.push('/color-match-results')
   // }
 
   // Complementary Match Simulation
@@ -49,7 +49,7 @@ export default function CameraScreen() {
   //     { r: 220, g: 120, b: 30 }, // Orange ~H:30
   //   )
   //   setCurrentMatch(result)
-  //   router.push('/results')
+  //   router.push('/color-match-results')
   // }
 
   // Triadic Match Simulation
@@ -59,7 +59,7 @@ export default function CameraScreen() {
   //     { r: 60, g: 60, b: 220 }, // Blue
   //   )
   //   setCurrentMatch(result)
-  //   router.push('/results')
+  //   router.push('/color-match-results')
   // }
 
   // Split-complementary Match Simulation
@@ -69,7 +69,7 @@ export default function CameraScreen() {
   //     { r: 220, g: 200, b: 30 }, // Yellow-green ~H:55
   //   )
   //   setCurrentMatch(result)
-  //   router.push('/results')
+  //   router.push('/color-match-results')
   // }
 
   // Poor Match Simulation
@@ -79,7 +79,7 @@ export default function CameraScreen() {
   //     { r: 140, g: 130, b: 125 },
   //   )
   //   setCurrentMatch(result)
-  //   router.push('/results')
+  //   router.push('/color-match-results')
   // }
 
   const {
@@ -133,14 +133,6 @@ export default function CameraScreen() {
       pulseAnim.setValue(1)
     }
   }, [cameraState])
-
-  useEffect(() => {
-    if (cameraState === 'color2_locked') {
-      router.push('/results')
-    }
-  }, [cameraState])
-
-  const mockIndex = useRef(0)
 
   const handleMockPress = () => {
     const index = cameraState === 'color1_locked' ? 1 : 0
@@ -199,13 +191,16 @@ export default function CameraScreen() {
           {liveColorName ? (
             <Text style={styles.liveColorName}>{liveColorName}</Text>
           ) : null}
-
-          <TouchableOpacity
-            style={styles.simulateButton}
-            onPress={() => handleMockPress(0)}
-          >
-            <Text style={styles.simulateButtonText}>Simulate Color (Dev)</Text>
-          </TouchableOpacity>
+          {__DEV__ && (
+            <TouchableOpacity
+              style={styles.simulateButton}
+              onPress={handleMockPress}
+            >
+              <Text style={styles.simulateButtonText}>
+                Simulate Color (Dev)
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {(cameraState === 'color1_locked' || cameraState === 'acquiring_2') &&
@@ -279,9 +274,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.white,
   },
-  crosshairAcquiring: {
-    borderColor: colors.tertiary,
-  },
   liveColorName: {
     color: colors.white,
     fontSize: 14,
@@ -290,20 +282,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
-  },
-  statusBar: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-  },
-  statusBarAcquiring: {
-    backgroundColor: colors.secondary,
-  },
-  statusText: {
-    color: colors.white,
-    fontSize: 16,
-    textAlign: 'center',
   },
   bottomNav: {
     flexDirection: 'row',

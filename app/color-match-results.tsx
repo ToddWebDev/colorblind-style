@@ -13,7 +13,7 @@ import { router } from 'expo-router'
 import { globalStyles, colors } from '@/src/constants/theme'
 import { analyzeMatch, suggestColors, isPoorMatch } from '@/src/color/engine'
 
-export default function ResultsScreen() {
+export default function ColorMatchResultScreen() {
   const { currentMatch, saveCurrentMatch, clearCurrentMatch } = useMatchStore()
   const { score, relationship, color1, color2 } = currentMatch
 
@@ -65,7 +65,7 @@ export default function ResultsScreen() {
 
   const handleNewMatch = () => {
     clearCurrentMatch()
-    router.replace('/(tabs)/camera')
+    router.dismissAll()
   }
 
   return (
@@ -96,7 +96,7 @@ export default function ResultsScreen() {
           />
         </View>
 
-        <TouchableOpacity onPress={() => router.push('/details')}>
+        <TouchableOpacity onPress={() => router.push('/color-match-details')}>
           <Text style={styles.viewDetails}>View Details</Text>
         </TouchableOpacity>
 

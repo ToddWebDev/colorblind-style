@@ -11,36 +11,6 @@ A React Native app that helps color-blind individuals confidently match clothing
 - TypeScript throughout
 - Jest for unit testing the color engine
 
-## Project Structure
-
-```
-colorblind-style/
-├── app/
-│   ├── _layout.tsx          # Root navigator
-│   ├── +not-found.tsx
-│   └── (tabs)/
-│       ├── _layout.tsx      # Tab navigator
-│       ├── camera.tsx       # Main scan view
-│       ├── results.tsx      # Match score screen
-│       └── saved.tsx        # Saved matches grid
-├── src/
-│   ├── color/
-│   │   ├── engine.ts        # Color analysis logic (RGB → HSL, hue distance, match scoring)
-│   │   └── names.json       # Named color dictionary
-│   ├── components/          # Shared UI components
-│   ├── constants/
-│   │   └── theme.ts         # Design tokens
-│   ├── db/
-│   │   ├── schema.ts        # SQLite schema
-│   │   └── queries.ts       # Read/write helpers
-│   ├── hooks/               # Custom hooks (useColorSampler, etc.)
-│   ├── store/
-│   │   └── useMatchStore.ts # Zustand store
-│   └── types/
-│       └── index.ts         # Shared TypeScript types
-└── assets/
-```
-
 ## Prerequisites
 
 - Node.js 18+
