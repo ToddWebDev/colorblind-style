@@ -11,6 +11,7 @@ import { useRef, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors } from '@/src/constants/theme'
 import { Ionicons } from '@expo/vector-icons'
+import LogoSvg from '@/src/components/LogoSvg'
 
 const { width } = Dimensions.get('window')
 
@@ -49,11 +50,7 @@ export default function StartScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          <View style={styles.logo}>
-            <View style={[styles.circle, styles.coral]} />
-            <View style={[styles.circle, styles.blue]} />
-            <View style={styles.overlap} />
-          </View>
+          <LogoSvg size={80} />
         </View>
 
         <Text style={styles.title}>Let's get started!</Text>
