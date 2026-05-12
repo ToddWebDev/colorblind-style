@@ -82,16 +82,13 @@ export default function ColorMatchResultScreen() {
           <View
             style={[
               styles.circle,
-              { backgroundColor: colorFromHsl(color1.hsl), marginRight: -40 },
+              { backgroundColor: colorFromHsl(color1.hsl), marginRight: -22 },
             ]}
           />
-          <View style={styles.scoreCircle}>
-            <Text style={styles.scoreText}>{score}%</Text>
-          </View>
           <View
             style={[
               styles.circle,
-              { backgroundColor: colorFromHsl(color2.hsl), marginLeft: -40 },
+              { backgroundColor: colorFromHsl(color2.hsl), marginLeft: -22 },
             ]}
           />
         </View>
@@ -195,22 +192,6 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: 70,
     opacity: 0.85,
-  },
-  scoreCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.white,
-    borderWidth: 3,
-    borderColor: '#2ecc71',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1,
-  },
-  scoreText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.black,
   },
   viewDetails: {
     fontSize: 16,
